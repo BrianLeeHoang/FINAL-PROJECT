@@ -1,4 +1,4 @@
-// Build and shuffle a real 52-card Blackjack deck
+//52 CARD BLACKJACK DECK
 const ranks = [
   { label: 'A', value: [1, 11] },
   { label: '2', value: 2 },
@@ -15,7 +15,8 @@ const ranks = [
   { label: 'K', value: 10 }
 ];
 const suits = ['♠', '♥', '♦', '♣'];
-const BOT_NAMES = ["Gregory", "Muhammad", "Elon", "Obama", "Lincoln", "Washington", "Trump", "Biden", "Ali", "Mr. Alpha", "Jamaican Botmon", "Brian", "Payton", "Matthew", "Austin"];
+//NAMES AND EMOJIS FOR THE BOTS
+const BOT_NAMES = ["Mr.Maxwell", "Gregory", "Muhammad", "Elon", "Obama", "Lincoln", "Washington", "Trump", "Biden", "Ali", "Mr. Alpha", "Jamaican Botmon", "Brian", "Payton", "Matthew", "Austin"];
 const BOT_EMOJIS = ["😭","😔","😡","😁","😂","😃","😅","😆","😉","😋","😍","🙂","😜","🤑","🤠","🤓", "👽","👴","🤡"];
 let deck = [];
 let activeTimeouts = [];
@@ -50,6 +51,7 @@ function buildDeck() {
   ranks.forEach(rank => suits.forEach(suit => deck.push({ label: rank.label, suit, value: rank.value })));
 }
 
+//BASICALLY PICKING RANDOM CARDS
 function shuffleDeck() {
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -62,6 +64,7 @@ function drawCard() {
   return deck.pop();
 }
 
+//CREATES CARD
 function createCardElement(card) {
   const mapFace = { J: 'J', Q: '♛', K: '♚' };
   const display = mapFace[card.label] || card.label;
@@ -89,7 +92,7 @@ function createCardElement(card) {
 buildDeck(); 
 shuffleDeck();
 
-// DOM elements
+//DOM ELEMENTS
 const startButton = document.getElementById('startGame');
 const newCardButton = document.getElementById('newCard');
 const standCardButton = document.getElementById('stand');
@@ -105,7 +108,7 @@ const bot2Sum = document.getElementById('bot2Sum');
 const gameMessage = document.getElementById('gameMessage');
 const betLabel = document.getElementById('betLabel');
 
-// Game state
+//GAME STATE
 let playerCardsArray = [];
 let dealerCardsArray = [];
 let bot1CardsArray = [];
@@ -129,6 +132,7 @@ function generateBotIdentity() {
     };
 }
 
+//ALLOWS PLAYER TO PLACE BET
 function placeBet() {
   gameMessage.textContent = "Enter your bet amount:";
   const msgDiv = document.getElementById('message');
@@ -156,6 +160,7 @@ function placeBet() {
   };
 }
 
+//START GAME BUTTON FUNCTION
 function startRound() {
   resetBoard(false);
   isPlaying = true;
@@ -167,7 +172,7 @@ function startRound() {
     bot1Emoji = bot1Identity.emoji;
     bot2Emoji = bot2Identity.emoji;
     
-    // Update DOM elements
+    //Update DOM elements
     document.getElementById('bot1Name').textContent = `${bot1Emoji} ${bot1Name}`;
     document.getElementById('bot2Name').textContent = `${bot2Emoji} ${bot2Name}`;
 
@@ -194,6 +199,7 @@ function startRound() {
   updateSums();
 }
 
+//RENDER DECKS
 function renderDeck(container, cards, hideHole = false) {
   container.innerHTML = '<p>Cards:</p>';
   cards.forEach((card, idx) => {
@@ -205,6 +211,7 @@ function renderDeck(container, cards, hideHole = false) {
   });
 }
 
+//ALLOWS PLAYER TO PICK BETWEEN 1 AND 11 WHEN THEY HAVE ACE
 function chooseAce() {
   if (playerCardsArray.some(c => Array.isArray(c.value))) {
     isPlaying = false;
@@ -241,6 +248,7 @@ function chooseAce() {
   }
 }
 
+//PLAYS BOTS AND DEALERS ACCORDING TO BLACKJACK STRATEGY (DRAW WHEN LESS THAN 17 STAND WHEN OVER)
 async function playBotsAndDealer() {
   if (!isBotActive) return;
   
@@ -271,6 +279,7 @@ async function playBotsAndDealer() {
   }
 }
 
+//BOTS PLAY
 async function playBot(botCards, botDeckDiv, botSumElement) {
   return new Promise(resolve => {
     if (!isBotActive) return resolve();
@@ -299,6 +308,7 @@ async function playBot(botCards, botDeckDiv, botSumElement) {
   });
 }
 
+//STAND BUTTON FUNCTION
 async function standCard() {
   if (!isPlaying) return;
   isPlaying = false;
@@ -318,6 +328,7 @@ async function standCard() {
   endRound(result);
 }
 
+//ADD CARD BUTTON FUNCTION
 function addCard() {
   if (!isPlaying) return;
   playerCardsArray.push(drawCard());
@@ -341,6 +352,7 @@ function addCard() {
   }
 }
 
+//DOUBLE DOWN BUTTON FUNCTION
 function doubleDown() {
   if (!isPlaying || !canDouble) return;
   
@@ -352,6 +364,8 @@ function doubleDown() {
   
   updateSums();
   
+  //FORCE END OF PLAYER TURN
+  isPlaying = false; 
   canDouble = false;
   doubleButton.disabled = true;
   
@@ -359,14 +373,14 @@ function doubleDown() {
   const timeout = setTimeout(async () => {
     await playBotsAndDealer();
     isBotActive = false;
-    if (isPlaying) return;
     const result = getResult();
     displayResult(result);
-    endRound(result);
+    endRound(result); 
   }, 50);
   activeTimeouts.push(timeout);
 }
 
+//UPDATE PLAYER AND DEALER SUMS
 function updateSums() {
   playerCardTotal = calculateOptimalTotal(playerCardsArray);
   playerSum.textContent = `Sum: ${playerCardTotal}`;
@@ -379,6 +393,7 @@ function updateSums() {
   }
 }
 
+//UPDATE BOT CARD SUMS
 function updateBotTotals() {
     bot1CardTotal = calculateOptimalTotal(bot1CardsArray);
     bot2CardTotal = calculateOptimalTotal(bot2CardsArray);
@@ -387,6 +402,7 @@ function updateBotTotals() {
     bot2Sum.textContent = `Sum: ${bot2CardTotal}`;
 }
 
+//COMPARE YOUR HAND TO THE BOTS AND DEALER
 function compareHands(playerCards, opponentCards) {
     const playerTotal = calculateOptimalTotal(playerCards);
     const opponentTotal = calculateOptimalTotal(opponentCards);
@@ -405,6 +421,7 @@ function compareHands(playerCards, opponentCards) {
     return 'push';
 }
 
+//ACQUIRES RESULTS
 function getResult() {
     return {
         dealer: compareHands(playerCardsArray, dealerCardsArray),
@@ -413,6 +430,7 @@ function getResult() {
     };
 }
 
+//DISPLAYS RESULTS AT THE END OF A ROUND
 function displayResult(results) {
     let dealerMessage = '';
     const botMessages = [];
@@ -421,7 +439,7 @@ function displayResult(results) {
     const playerBJ = hasBlackjack(playerCardsArray);
     const dealerBJ = hasBlackjack(dealerCardsArray);
     
-    // Dealer result
+    //DEALER RESULT
     switch(results.dealer) {
         case 'win':
             dealerMessage = dealerBJ ? "Dealer has Blackjack! You lose!" 
@@ -440,9 +458,9 @@ function displayResult(results) {
             break;
     }
 
-    // Bot results
-    [['Bot 1', results.bot1, bot1CardsArray], 
-     ['Bot 2', results.bot2, bot2CardsArray]].forEach(([name, result, cards]) => {
+    //BOT RESULTS
+    [[bot1Name, results.bot1, bot1CardsArray], 
+     [bot2Name, results.bot2, bot2CardsArray]].forEach(([name, result, cards]) => {
         const botBJ = hasBlackjack(cards);
         let message = '';
         
@@ -466,14 +484,14 @@ function displayResult(results) {
         botMessages.push(message);
     });
 
-    // Build final message
+    //make final message
     let finalMessage = dealerMessage;
     
     if (botMessages.length > 0) {
         finalMessage += ` You ${botMessages.join(', ')}.`;
     }
 
-    // Special cases
+    //Special cases
     if (calculateOptimalTotal(playerCardsArray) > 21) {
         finalMessage = "Busted! You lost to all players!";
     } else if (winCount === 3) {
@@ -485,25 +503,37 @@ function displayResult(results) {
     gameMessage.textContent = finalMessage;
 }
 
+//UPDATES AT THE END OF A ROUND
 function endRound() {
     const results = getResult();
     
-    // Update bet based on blackjack rules
+    //Update bet based on results
     if (hasBlackjack(playerCardsArray)) {
-        betAmount = Math.floor(betAmount * 1.5);
+        betAmount = Math.floor(betAmount * 1.5); //Blackjack pays 3:2
+    } else if (
+        results.dealer === 'lose' || 
+        results.bot1 === 'lose' || 
+        results.bot2 === 'lose'
+    ) {
+        betAmount = 0; //Lose entire bet if any loss
     } else {
+        //Only check dealer result if no losses to any players
         switch(results.dealer) {
-            case 'win': betAmount *= 2; break;
-            case 'lose': betAmount = 0; break;
-            case 'push': break;
+            case 'win': 
+                betAmount *= 2; //Double bet if beating dealer
+                break;
+            case 'push': 
+                //No change for push
+                break;
         }
     }
 
     betLabel.textContent = `Bet: $${betAmount}`;
     displayResult(results);
-    playAgain(results.dealer === 'lose' || calculateOptimalTotal(playerCardsArray) > 21);
+    playAgain(betAmount === 0); // Only require new bet if lost
 }
 
+//PLAY AGAIN FUNCTION
 function playAgain(needBet) {
   const gameDiv = document.getElementById('gameDiv');
   const btn = document.createElement('button');
@@ -513,12 +543,14 @@ function playAgain(needBet) {
   btn.onclick = () => { btn.remove(); needBet ? placeBet() : startRound(); };
 }
 
+//RESET GAME
 function resetGame() {
   startButton.textContent = 'Start Game';
   startButton.onclick = placeBet;
   resetBoard(true);
 }
 
+//COMPLETE RESET OF THE GAME
 function resetBoard(clearBet) {
   activeTimeouts.forEach(clearTimeout);
   activeTimeouts = [];
@@ -551,10 +583,7 @@ function resetBoard(clearBet) {
     betLabel.textContent = `Bet: $${betAmount}`;
   }
 }
-
-//
-
-// Event listeners
+//EVENT LISTENERS
 startButton.addEventListener('click', placeBet);
 newCardButton.addEventListener('click', addCard);
 standCardButton.addEventListener('click', standCard);
